@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+      $(document).ready(function(){
+         var myWebSocket = new WebSocket("ws://127.0.0.1:4495");
+            myWebSocket.onopen = function(evt) { alert("Connection open ..."); };
+            
+       
+            
+           // myWebSocket.onmessage = function(evt) { alert( "Received Message: " + evt.data); };
+           // myWebSocket.onclose = function(evt) { alert("Connection closed."); };  
+      });
+    </script>
+  </head>
+  <body>
+  <p id='thingsThatHappened'><p>
+  
+  </body>
+</html>
