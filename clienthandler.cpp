@@ -6,87 +6,83 @@ ClientHandler::ClientHandler(ComunicationCenter *serviceCenter)
 }
 
 
+QString ClientHandler::AccessRequest(const QString &msn){
+    try{
+       SocketUtils::StringMap httpResponce;
+
+       httpResponce["Host"] = "127.0.0.1:4495";
+       httpResponce["Upgrade"] = "websocket";
+       httpResponce["Connection"] = "Upgrade";
+       httpResponce["Sec-WebSocket-Accept"] = Server_Handshake_Response(GetKeyFromProtocolHeader(msn));
+       httpResponce["Sec-WebSocket-Version"] = "13";
+       QString responce = httpRequestFromMap("HTTP/1.1 101 Switching Protocols",httpResponce);
+       cout <<  responce.toStdString() << endl;
+       return responce;
+    }catch(string e){
+        throw e;
+    }
+}
+
 
 void ClientHandler::start(){
  cout << "atendiendo al cliente "<< Fd_Socket << endl;
  cout << "Request de acceso"<< endl;
- string msn;
  try{
-  msn = SocketUtils::ReadMSN(Fd_Socket);
+     SocketUtils::sendMsn(Fd_Socket,AccessRequest(SocketUtils::ReadMSN(Fd_Socket)));
  }catch(string ex){
      cout << ex << endl;
      ServiceCenter->RemoverClient(this);
+     return;
  }
 
- cout << msn << endl;
- try{
-   // SocketUtils::StringMap httpResponce;
-
-   // httpResponce["Host"] = "127.0.0.1:4495";
-   /* httpResponce["Upgrade"] = "websocket";
-    httpResponce["Connection"] = "Upgrade";
-    httpResponce["Sec-WebSocket-Accept"] = Server_Handshake_Response(GetKeyFromProtocolHeader(msn));
-    //httpResponce["Sec-WebSocket-Version"] = "13";
-    string responce = httpRequestFromMap("HTTP/1.1 101 Switching Protocols",httpResponce);
-    cout <<  responce ;
-    */
-    QString key = QString::fromStdString(GetKeyFromProtocolHeader(msn)).trimmed();
-
-    QString keyresuelta = key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    keyresuelta = keyresuelta.trimmed();
-
-       QCryptographicHash sha1(QCryptographicHash::Sha1);
-       sha1.addData(keyresuelta.toUtf8());
-       QString accpetKey = sha1.result().toBase64();
-    QString responce = "HTTP/1.1 101 Switching Protocols\r\n";
-    responce += "Connection: Upgrade\r\n";
-    responce += "Upgrade: websocket\r\n";
-    responce += "Sec-WebSocket-Accept: "+accpetKey+"\r\n";
-    responce += "\r\n";
-    cout << responce.toStdString();
-    SocketUtils::sendMsn(Fd_Socket,responce.toStdString());
-
- }catch(string e){
-     cout << e << endl;
- }
-
- // SocketUtils::sendMsn();
-// while(1){
-
-// }
+ StarListen();
 
  shutdown(Fd_Socket,SHUT_RDWR);
 }
 
-string ClientHandler::httpRequestFromMap(const string &PeticionHead , SocketUtils::StringMap map){
-    string httpString = PeticionHead + "\r\n";
+void ClientHandler::StarListen(){
+    while(1){
+
+        try{
+            QString MSN = SocketUtils::DecodeWebSocket( SocketUtils::ReadMSN(Fd_Socket));
+            cout << MSN.toStdString() << endl;
+        }catch(string e){
+            cout << e << endl;
+            return;
+        }
+
+    }
+}
+
+QString ClientHandler::httpRequestFromMap(const QString &PeticionHead , SocketUtils::StringMap map){
+    QString httpString = PeticionHead;
+            httpString += "\r\n";
     for (auto& node : map) {
         httpString +=  node.first + ":"+node.second+"\r\n";
     }
     return httpString+"\r\n";
 }
 
-string ClientHandler::GetKeyFromProtocolHeader(const string &ProtocolHeader){
-   QStringList lst = QString::fromStdString(ProtocolHeader).split("\r\n");
+QString ClientHandler::GetKeyFromProtocolHeader(const QString &ProtocolHeader){
+   QStringList lst = ProtocolHeader.split("\r\n");
    foreach (QString value, lst) {
        QStringList row = value.split(":");
        if(row.size() > 0){
            if(row[0] == "Sec-WebSocket-Key"){
-               return row[1].toStdString();
+               return row[1].trimmed();
            }
        }
    }
-   throw string("Http rquest invalido");
+   throw QString("Http request invalido");
 
 }
 
-string ClientHandler::Server_Handshake_Response(const string &Sec_WebSocket_Key){
+QString ClientHandler::Server_Handshake_Response(const QString &Sec_WebSocket_Key){
     QCryptographicHash sha1(QCryptographicHash::Sha1);
-    string Handshake = Sec_WebSocket_Key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    std::remove(Handshake.begin(), Handshake.end(), ' ');
-    cout << Handshake << "END" << endl;
-    sha1.addData(Handshake.c_str(),Handshake.size());
-    return QString(sha1.result().toBase64()).toStdString();
+    QString Handshake = Sec_WebSocket_Key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    Handshake = Handshake.remove(" ");
+    sha1.addData(Handshake.toStdString().c_str(),Handshake.size());
+    return QString(sha1.result().toBase64());
 }
 
 

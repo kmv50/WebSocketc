@@ -1,13 +1,13 @@
 #include "socketutil.h"
 
-void SocketUtils::sendMsn(int fd , const string  &msn){
-    unsigned int bytesRead = send(fd,msn.c_str(),msn.size(),0);
+void SocketUtils::sendMsn(int fd , const QString  &msn){
+    unsigned int bytesRead = send(fd,msn.toStdString().c_str(),msn.size(),0);
     if(bytesRead < msn.size()){
         throw string("Error al enviar Mensaje");
     }
 }
 
-string SocketUtils::ReadMSN(int fd){
+QString SocketUtils::ReadMSN(int fd){
 
     char buffer[10] = {0};
     std::string databuffer;
@@ -33,5 +33,10 @@ string SocketUtils::ReadMSN(int fd){
 
     fcntl(fd, F_SETFL, flags);
     //restaura la configurarion del read para este socket
-    return databuffer;
+    return QString::fromStdString(databuffer);
+}
+
+
+QString SocketUtils::DecodeWebSocket(const QString &msn){
+
 }

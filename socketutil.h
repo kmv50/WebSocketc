@@ -6,12 +6,14 @@
 #include <unistd.h>
 #include <string>
 #include <map>
+#include <QString>
 using namespace std;
 
 namespace SocketUtils {
-   typedef map<string,string> StringMap;
-   void sendMsn(int fd , const string  &msn);
-   string ReadMSN(int fd);
+   typedef map<QString,QString> StringMap;
+   void sendMsn(int fd , const QString &msn);
+   QString ReadMSN(int fd);
+   QString DecodeWebSocket(const QString &msn);
 }
 
 

@@ -8,8 +8,6 @@
 #include <QStringList>
 #include <map>
 
-#define MagicString "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-
 class ComunicationCenter;
 
 class ClientHandler
@@ -21,9 +19,11 @@ public:
 private:
     int Fd_Socket;
     ComunicationCenter * ServiceCenter;
-    string Server_Handshake_Response(const string &Sec_WebSocket_Key);
-    string GetKeyFromProtocolHeader(const string &ProtocolHeader);
-    string httpRequestFromMap(const string &PeticionHead, SocketUtils::StringMap map);
+    QString Server_Handshake_Response(const QString &Sec_WebSocket_Key);
+    QString GetKeyFromProtocolHeader(const QString &ProtocolHeader);
+    QString httpRequestFromMap(const QString &PeticionHead, SocketUtils::StringMap map);
+    QString AccessRequest(const QString &msn);
+    void StarListen();
 };
 
 #endif // CLIENTHANDLER_H
