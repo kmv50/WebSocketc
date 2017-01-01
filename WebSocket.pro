@@ -19,4 +19,5 @@ HEADERS += \
     socketutil.h \
     clienthandler.h \
     webserver.h \
-    comunicationcenter.h
+    comunicationcenter.h \
+    websockettypemsn.h

@@ -44,14 +44,17 @@ void ClientHandler::StarListen(){
     while(1){
 
         try{
-            QString MSN = SocketUtils::DecodeWebSocket( SocketUtils::ReadMSN(Fd_Socket));
+            QString MSN =  SocketUtils::ReadMSNBytes(Fd_Socket);
+            if(MSN == NULL)
+                break;
             cout << MSN.toStdString() << endl;
         }catch(string e){
             cout << e << endl;
-            return;
+            break;
         }
 
     }
+    ServiceCenter->RemoverClient(this);
 }
 
 QString ClientHandler::httpRequestFromMap(const QString &PeticionHead , SocketUtils::StringMap map){
