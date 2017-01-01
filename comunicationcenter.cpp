@@ -24,7 +24,7 @@ void ComunicationCenter::RegisterClient(ClientHandler *client){
 void ComunicationCenter::RemoverClient(ClientHandler *client){
     m_lock.lock();
         int indexToDelete = -1;
-        for(int i = 0 ; i < clientList.size(); i++){
+        for(unsigned int i = 0 ; i < clientList.size(); i++){
             if(clientList[i] == client){
                 indexToDelete = i;
                 break;
