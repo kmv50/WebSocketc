@@ -48,6 +48,14 @@ void ClientHandler::StarListen(){
             if(MSN == NULL)
                 break;
             cout << MSN.toStdString() << endl;
+            QString path = QCoreApplication::applicationDirPath() +"/test.ws";
+            cout << path.toStdString() << endl;
+            QFile file(path);
+                file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+                QString result = QString::fromUtf8( file.readAll());
+
+            SocketUtils::sendMsnEncode(Fd_Socket,result);
         }catch(string e){
             cout << e << endl;
             break;

@@ -101,7 +101,6 @@ unsigned long int SocketUtils::CalculoLongitudMensaje(const BytesBuffer &rawStri
 
      }else if(127){
         //Si (unsigned int)rawString[1] fuera igual a 127 se tendria que realizar este calculo
-
         unsigned int MSN_bytes_Size[8] = {
             (unsigned int)rawString[2],
             (unsigned int)rawString[3],
@@ -182,6 +181,10 @@ QString SocketUtils::DecodeWebSocket(BytesBuffer rawString){
     for (unsigned int i = bytesUsados; (i-bytesUsados+1) <= longitud; i++) {
         mensaje += (rawString[i] ^ key[(i-bytesUsados) % 4]);
     }
+    //^ es la operacion binaria  XOR osea si tengo
+    //1100
+    //1010
+    //0110 -> resultado
     /*
         0  %  4 = 0
         1  %  4 = 1
@@ -200,4 +203,79 @@ QString SocketUtils::DecodeWebSocket(BytesBuffer rawString){
 tipo de mensaje 1 longitud 36 bytes usados 2
 key 6
 {"Msn":"ahora si sirve esta mierda"}
+*/
+
+void SocketUtils::sendMsnEncode(const int fd, const QString &msnStr){
+    string msn = msnStr.toStdString();
+    BytesBuffer encodeMSN;
+    encodeMSN += 129;//formato del mensaje texto
+    if(msn.size() <= 125){
+        cout << "Mensaje pequeno" << endl;
+        encodeMSN += (unsigned char)msn.size();
+    }else if(msn.size() >= 126 && msn.size() <= 65535){
+        cout << "Mensaje mediano" << endl;
+        encodeMSN += 126;
+        encodeMSN += ((msn.size() >> 8) % 256);
+        encodeMSN += (msn.size() % 256);
+    }else{
+        cout << "Mensaje grande" << endl;
+        encodeMSN += 127;
+        encodeMSN += ((msn.size() >> 56) % 256);
+        encodeMSN += ((msn.size() >> 48) % 256);
+        encodeMSN += ((msn.size() >> 40) % 256);
+        encodeMSN += ((msn.size() >> 32) % 256);
+        encodeMSN += ((msn.size() >> 24) % 256);
+        encodeMSN += ((msn.size() >> 16) % 256);
+        encodeMSN += ((msn.size() >> 8) % 256);
+        encodeMSN += (msn.size() % 256);
+    }
+    encodeMSN += BytesBuffer(msn.begin(), msn.end());
+    //encodeMSN += reinterpret_cast<const unsigned char *>(msn.c_str(),msn.size());
+
+    int bytesRead = send(fd,&encodeMSN[0],encodeMSN.size(),0);
+    if(bytesRead < msn.size()){
+        throw string("Error al enviar Mensaje");
+    }
+}
+/* de mi c#
+byte[] EncodeMsn(string msn)
+        {
+            List<byte> Payload = new List<byte>();
+            Payload.Add(0x81);
+
+            //Calculo de longitud de mensaje longitug maxima 65535
+            try
+            {
+                int LongitudMensaje = msn.Length;
+                if (LongitudMensaje <= 125)
+                    Payload.Add(Convert.ToByte(msn.Length));
+                else if (LongitudMensaje >= 126 && LongitudMensaje <= 65535)
+                {
+                    Payload.Add(Convert.ToByte(126));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 8) & 255));
+                    Payload.Add(Convert.ToByte(LongitudMensaje & 255));
+                }
+                else
+                {
+                    Payload.Add(Convert.ToByte(127));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 56) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 48) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 40) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 32) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 24) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 16) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje >> 8) & 255));
+                    Payload.Add(Convert.ToByte((LongitudMensaje) & 255));
+                }
+
+
+                //Datos
+                Payload.AddRange(Encoding.UTF8.GetBytes(msn));
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return Payload.ToArray();
+        }
 */

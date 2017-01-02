@@ -22,6 +22,7 @@ namespace SocketUtils {
    QString DecodeWebSocket(BytesBuffer rawString);
    unsigned long CalculoLongitudMensaje(const BytesBuffer &rawString, int *bytesUsados);
    TipoMensaje DecodificarTipoMensaje(const unsigned char &firstByte);
+   void sendMsnEncode(const int fd , const QString &msnStr);
 }
 
 

@@ -13,7 +13,7 @@
             };
                             
             myWebSocket.onmessage = function(evt) { 
-                 console.log(evt);
+                 //console.log(evt);
                  readMsn(evt.data); 
              };            
             
@@ -69,7 +69,7 @@
     };
       
       function readMsn(data){
-         alert(data);
+         $('#debug').html(data);
       }
       
     </script>
@@ -90,6 +90,9 @@
          </div>
       </div>
    </div>  
+   <div id='debug' class='row' style='padding: 100px'>
+   
+   </div>
    <div class='row'>
        <p id='ErrorBox' ></p>
    </div>

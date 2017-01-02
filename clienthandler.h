@@ -8,6 +8,9 @@
 #include <QStringList>
 #include <map>
 
+#include <QFile>
+#include <QCoreApplication>
+
 class ComunicationCenter;
 
 class ClientHandler

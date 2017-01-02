@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <webserver.h>
 #include <comunicationcenter.h>
 
@@ -5,9 +6,11 @@ WebServer *server;
 
 int main(int argc, char *argv[])
 {
+  QCoreApplication a(argc, argv);
   server = new WebServer(new ComunicationCenter);
   server->run();
   delete server;
+  return a.exec();
 }
 
 
